@@ -8,6 +8,7 @@ import Button from "../../components/ui/Button";
 import PurchaseStats from "./components/PurchaseStats";
 import toast from "react-hot-toast";
 import SearchDropdown from "@/components/ui/SearchDropdown";
+import { Pencil, Trash2 } from "lucide-react";
 
 type Supplier = {
   id: number;
@@ -324,9 +325,14 @@ else if (dateFilter === "custom") {
 return (
   <MainLayout>
 
-<h1 className="text-4xl font-bold mb-6">
-  Purchase Entry
-</h1>
+<div className="mb-6">
+  <h1 className="text-[26px] font-bold text-slate-900 tracking-tight">
+    Purchases
+  </h1>
+  <p className="text-[13.5px] text-slate-500 mt-0.5">
+    Record incoming raw material purchases
+  </p>
+</div>
 
 <PurchaseStats
   totalPurchases={purchases.length}
@@ -354,42 +360,6 @@ return (
     setSupplierId(supplier.id);
   }}
 />
-
-  {showSupplierDropdown && supplierSearch.length > 0 && (
-    <div className="absolute left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg z-50 max-h-52 overflow-y-auto">
-
-      {filteredSuppliers.length === 0 ? (
-
-        <div className="px-4 py-2 text-gray-500">
-          No supplier found
-        </div>
-
-      ) : (
-
-        filteredSuppliers.map((supplier) => (
-
-          <div
-            key={supplier.id}
-            className="px-4 py-2 cursor-pointer hover:bg-green-100"
-            onClick={() => {
-  setSupplierSearch(supplier.name);
-  setSupplierId(supplier.id);
-  setShowSupplierDropdown(false);
-  vehicleRef.current?.focus();
-  setTimeout(() => {
-    setSupplierSearch(supplier.name);
-  }, 50);
-}}
-          >
-            {supplier.name}
-          </div>
-
-        ))
-
-      )}
-
-    </div>
-  )}
 
 </div>
 
@@ -471,103 +441,33 @@ return (
 
   <div className="flex gap-2 flex-wrap">
 
-  <button
-  
-
-  onClick={() => setDateFilter("all")}
-
-  className={`rounded-lg px-4 py-2 ${
-
-    dateFilter === "all"
-
-      ? "bg-green-600 text-white"
-
-      : "bg-gray-200 hover:bg-gray-300"
-
-  }`}
-
->
-
-  All
-
-</button>
-
-  <button
-  onClick={() => setDateFilter("today")}
-  className={`rounded-lg px-4 py-2 ${
-    dateFilter === "today"
-      ? "bg-green-600 text-white"
-      : "bg-gray-200 hover:bg-gray-300"
-  }`}
->
-  Today
-</button>
-
-  <button
-
-  onClick={() => setDateFilter("yesterday")}
-
-  className={`rounded-lg px-4 py-2 ${
-
-    dateFilter === "yesterday"
-
-      ? "bg-green-600 text-white"
-
-      : "bg-gray-200 hover:bg-gray-300"
-
-  }`}
-
->
-
-  Yesterday
-
-</button>
-
-  <button
-
-  onClick={() => setDateFilter("month")}
-
-  className={`rounded-lg px-4 py-2 ${
-
-    dateFilter === "month"
-
-      ? "bg-green-600 text-white"
-
-      : "bg-gray-200 hover:bg-gray-300"
-
-  }`}
-
->
-
-  This Month
-
-</button>
-
-  <button
-
-  onClick={() => setDateFilter("custom")}
-
-  className={`rounded-lg px-4 py-2 ${
-
-    dateFilter === "custom"
-
-      ? "bg-green-600 text-white"
-
-      : "bg-gray-200 hover:bg-gray-300"
-
-  }`}
-
->
-
-  Custom Date
-
-</button>
+  {(
+    [
+      { key: "all", label: "All" },
+      { key: "today", label: "Today" },
+      { key: "yesterday", label: "Yesterday" },
+      { key: "month", label: "This Month" },
+      { key: "custom", label: "Custom Date" },
+    ] as const
+  ).map((f) => (
+    <button
+      key={f.key}
+      onClick={() => setDateFilter(f.key)}
+      className={`rounded-lg px-4 py-2 text-[13px] font-medium transition-colors ${
+        dateFilter === f.key
+          ? "bg-emerald-600 text-white"
+          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+      }`}
+    >
+      {f.label}
+    </button>
+  ))}
 
 </div>
 
   {dateFilter === "custom" && (
-  <div>
-    <label className="block mb-2 text-sm font-medium">
+  <div className="mt-4">
+    <label className="block mb-2 text-[13px] font-medium text-slate-600">
       Date
     </label>
 
@@ -575,7 +475,7 @@ return (
       type="date"
       value={selectedDate}
       onChange={(e) => setSelectedDate(e.target.value)}
-      className="rounded-lg border border-gray-300 px-4 py-2 focus:border-green-600 focus:ring-2 focus:ring-green-500 outline-none"
+      className="rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 outline-none transition-shadow"
     />
   </div>
 )}
@@ -585,17 +485,17 @@ return (
 </div>
   <Card title="Purchase List">
 
-    <table className="w-full">
+    <table className="w-full border-collapse">
 
       <thead>
-  <tr className="bg-green-700 text-white">
-    <th className="p-3 text-center">#</th>
-    <th className="p-3 text-center">Supplier</th>
-    <th className="p-3 text-center">Vehicle</th>
-    <th className="p-3 text-center">Material</th>
-    <th className="p-3 text-center">Qty (Kg)</th>
-    <th className="p-3 text-center">Time</th>
-    <th className="p-3 text-center">Action</th>
+  <tr className="bg-slate-50 border-b border-slate-200">
+    <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">#</th>
+    <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Supplier</th>
+    <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Vehicle</th>
+    <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Material</th>
+    <th className="p-3 text-right text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Qty (Kg)</th>
+    <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Time</th>
+    <th className="p-3 text-center text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Action</th>
   </tr>
 </thead>
 
@@ -604,22 +504,10 @@ return (
         {filteredPurchases.length === 0 ? (
 
           <tr>
-            <td colSpan={7} className="text-center p-8 text-gray-500">
-              No Purchase Found
+            <td colSpan={7} className="text-center p-10 text-slate-400 text-[13.5px]">
+              No purchases recorded yet
             </td>
-            <td className="p-3 text-center">
-  <div className="flex justify-center gap-2">
-
-    <button className="px-2 py-1 rounded bg-blue-100 hover:bg-blue-200">
-      ✏️
-    </button>
-
-    <button className="px-2 py-1 rounded bg-red-100 hover:bg-red-200">
-      🗑️
-    </button>
-
-  </div>
-</td>
+            
           </tr>
 
         ) : (
@@ -628,45 +516,47 @@ return (
 
             <tr
               key={purchase.id}
-              className="border-b hover:bg-gray-50"
+              className="border-b border-slate-100 hover:bg-slate-50/70 text-[13.5px] text-slate-700"
             >
-              <td className="p-3">{index + 1}</td>
+              <td className="p-3 text-slate-400">{index + 1}</td>
 
-              <td className="text-center p-3">
+              <td className="p-3 font-medium text-slate-800">
                 {purchase.supplierName}
               </td>
 
-              <td className="text-center p-3">
+              <td className="p-3">
                 {purchase.vehicleNumber}
               </td>
 
-              <td className="text-center p-3">
+              <td className="p-3">
                 {purchase.material}
               </td>
 
-              <td className="text-center p-3">
-                {purchase.quantity}
+              <td className="p-3 text-right tabular-nums">
+                {purchase.quantity.toLocaleString()}
               </td>
 
-              <td className="p-3 text-center">
+              <td className="p-3 text-slate-500">
   {new Date(purchase.createdAt).toLocaleString()}
 </td>
 
-<td className="p-3 text-center">
-  <div className="flex justify-center gap-2">
+<td className="p-3">
+  <div className="flex justify-center gap-1.5">
 
     <button
-  className="px-2 py-1 rounded bg-blue-100 hover:bg-blue-200"
+  className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors"
   onClick={() => editPurchase(purchase)}
+  title="Edit"
 >
-  ✏️
+  <Pencil size={15} />
 </button>
 
     <button
-  className="px-2 py-1 rounded bg-red-100 hover:bg-red-200"
+  className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
   onClick={() => deletePurchase(purchase.id)}
+  title="Delete"
 >
-  🗑️
+  <Trash2 size={15} />
 </button>
 
   </div>

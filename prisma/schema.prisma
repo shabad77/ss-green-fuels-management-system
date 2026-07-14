@@ -27,15 +27,92 @@ model Vehicle {
 }
 
 model Purchase {
-  id           Int      @id @default(autoincrement())
-  supplierId   Int
-  vehicleId    Int
+  id         Int      @id @default(autoincrement())
 
-  material     String
-  quantity     Float
+  supplierId Int
+  vehicleId  Int
 
-  createdAt    DateTime @default(now())
+  material   String
+  quantity   Float
+
+  createdAt  DateTime @default(now())
 
   supplier Supplier @relation(fields: [supplierId], references: [id])
-  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+  vehicle  Vehicle  @relation(fields: [vehicleId], references: [id])
+}
+
+model Buyer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  mobile    String
+  address   String
+  gst       String?
+  createdAt DateTime @default(now())
+
+  sales Sale[]
+}
+
+model Sale {
+  id            Int      @id @default(autoincrement())
+
+  buyerId       Int
+
+  invoiceNo     String   @unique
+
+  invoiceDate   DateTime
+
+  vehicleNo     String
+
+  ewayBillNo    String?
+
+  shipToAddress String?
+
+  quantity      Float
+
+  rate          Float
+
+  amount        Float
+
+  gstPercent    Float
+
+  gstAmount     Float
+
+  total         Float
+
+  createdAt     DateTime @default(now())
+
+  buyer Buyer @relation(fields: [buyerId], references: [id])
+}
+
+
+model Company {
+  id                  Int      @id @default(1)
+
+  companyName         String
+  gstNumber           String
+    panNumber       String?
+  address             String
+  city                String
+  state               String
+  pincode             String
+
+  phone               String?
+  email               String?
+  website             String?
+
+  bankName            String?
+  accountName         String?
+  accountNumber       String?
+  ifscCode            String?
+  branch              String?
+
+  upiId               String?
+
+  logo                String?
+  signature           String?
+
+  terms               String?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }

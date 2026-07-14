@@ -1,0 +1,37 @@
+@page {
+  size: A4;
+  margin: 8mm;
+}
+
+@media print {
+
+  html,
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #invoice,
+  #invoice * {
+    visibility: visible;
+  }
+
+  #invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .print\\:hidden {
+    display: none !important;
+  }
+
+}

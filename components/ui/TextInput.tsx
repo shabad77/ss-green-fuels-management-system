@@ -29,7 +29,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
     return (
       <div>
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-[13px] font-medium text-slate-600 mb-1.5">
             {label}
           </label>
         )}
@@ -41,7 +41,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder={placeholder}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 text-black focus:border-green-600 focus:ring-2 focus:ring-green-500 outline-none"
+          className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-[13.5px] text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 outline-none transition-shadow"
         />
       </div>
     );

@@ -25,14 +25,14 @@ export default function Input({
      <input
   type={inputType}
   placeholder={placeholder}
-  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-black placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+  className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
 />
 
       {type === "password" && (
         <button
   type="button"
   onClick={() => setShowPassword(!showPassword)}
-  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-green-600"
+  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-600"
 >
           {showPassword ? (
   <EyeOff size={20} className="text-gray-600" />

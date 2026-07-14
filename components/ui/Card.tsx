@@ -10,11 +10,11 @@ export default function Card({
   headerRight,
 }: CardProps) {
   return (
-    <div className="bg-white rounded-xl shadow p-6">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
 
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
 
-        <h2 className="text-xl font-semibold text-gray-800">
+        <h2 className="text-[15px] font-semibold text-slate-900 tracking-tight">
           {title}
         </h2>
 
@@ -22,7 +22,9 @@ export default function Card({
 
       </div>
 
-      {children}
+      <div className="p-6">
+        {children}
+      </div>
 
     </div>
   );

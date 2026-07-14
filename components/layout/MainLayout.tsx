@@ -10,8 +10,8 @@ export default function MainLayout({ children }: Props) {
 
       <Sidebar />
 
-      <main className="flex-1 bg-gray-100 min-h-screen p-8 text-gray-800">
-        {children}
+      <main className="flex-1 bg-slate-50 min-h-screen p-8 text-slate-800">
+        <div className="mx-auto max-w-[1400px]">{children}</div>
       </main>
 
     </div>
