@@ -25,7 +25,7 @@ type SearchDropdownProps<T> = {
   getLabel: (item: T) => string;
 
   nextRef?: React.RefObject<
-    HTMLInputElement | HTMLSelectElement | HTMLButtonElement
+    HTMLInputElement | HTMLSelectElement | HTMLButtonElement | null
   >;
 };
 
