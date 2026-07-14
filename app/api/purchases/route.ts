@@ -1,6 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+type PurchaseWithRelations = {
+  id: number;
+  material: string;
+  quantity: number;
+  createdAt: Date;
+  supplier: {
+    name: string;
+  };
+  vehicle: {
+    vehicleNumber: string;
+  };
+};
+
 export async function GET() {
   const purchases = await prisma.purchase.findMany({
     include: {
@@ -13,7 +26,7 @@ export async function GET() {
   });
 
   return NextResponse.json(
-    purchases.map((purchase) => ({
+    purchases.map((purchase: PurchaseWithRelations) => ({
       id: purchase.id,
       supplierName: purchase.supplier.name,
       vehicleNumber: purchase.vehicle.vehicleNumber,
