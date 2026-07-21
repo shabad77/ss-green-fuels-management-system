@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-console.log(prisma);
-console.log(prisma.sale);
-
 export async function GET() {
   try {
     const sales = await prisma.sale.findMany({
@@ -27,37 +24,52 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  try {
+    const body = await request.json();
 
-  const sale = await prisma.sale.create({
-    data: {
-      buyerId: Number(body.buyerId),
+    const sale = await prisma.sale.create({
+      data: {
+        buyerId: Number(body.buyerId),
 
-      invoiceNo: body.invoiceNo,
+        invoiceNo: body.invoiceNo,
 
-      invoiceDate: new Date(body.invoiceDate),
+        invoiceDate: new Date(body.invoiceDate),
 
-      vehicleNo: body.vehicleNo,
+        vehicleNo: body.vehicleNo,
 
-      ewayBillNo: body.ewayBillNo || null,
+        ewayBillNo: body.ewayBillNo || null,
 
-      shipToAddress: body.shipToAddress || null,
+        shipToAddress: body.shipToAddress || null,
 
-      quantity: Number(body.quantity),
+        itemName: body.itemName || null,
 
-      rate: Number(body.rate),
+        hsnCode: body.hsnCode || null,
 
-      amount: Number(body.amount),
+        unit: body.unit || null,
 
-      gstPercent: Number(body.gstPercent),
+        quantity: Number(body.quantity),
 
-      gstAmount: Number(body.gstAmount),
+        rate: Number(body.rate),
 
-      total: Number(body.total),
-    },
-  });
+        amount: Number(body.amount),
 
-  return NextResponse.json(sale);
+        gstPercent: Number(body.gstPercent),
+
+        gstAmount: Number(body.gstAmount),
+
+        total: Number(body.total),
+      },
+    });
+
+    return NextResponse.json(sale);
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      { error: String(error) },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PUT(request: Request) {
@@ -75,6 +87,13 @@ export async function PUT(request: Request) {
         vehicleNo: body.vehicleNo,
         ewayBillNo: body.ewayBillNo || null,
         shipToAddress: body.shipToAddress || null,
+
+        itemName: body.itemName || null,
+
+        hsnCode: body.hsnCode || null,
+
+        unit: body.unit || null,
+
         quantity: Number(body.quantity),
         rate: Number(body.rate),
         amount: Number(body.amount),

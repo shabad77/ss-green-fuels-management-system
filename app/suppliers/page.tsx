@@ -7,6 +7,7 @@ import TextInput from "../../components/ui/TextInput";
 import Button from "../../components/ui/Button";
 import { Pencil, Trash2 } from "lucide-react";
 
+
 type Supplier = {
   id: number;
   name: string;

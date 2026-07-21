@@ -25,7 +25,13 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
+    /* Match the printable area exactly: A4 (210mm x 297mm) minus the
+       8mm @page margin on every side. Without this, the on-screen
+       min-height of 297mm exceeds the printable area and the tail
+       of the invoice (signature line) spills onto a second page. */
+    width: 194mm !important;
+    min-height: 281mm !important;
+    height: 281mm !important;
     border: none !important;
     box-shadow: none !important;
   }

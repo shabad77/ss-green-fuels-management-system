@@ -105,6 +105,12 @@ function formatMoney(n: number): string {
   return n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// Shows up to 1 decimal place, but drops it when the number is whole
+// (2.5 -> "2.5", 9 -> "9") instead of rounding 2.5 up to "3".
+function formatPercent(n: number): string {
+  return Number(n.toFixed(1)).toString();
+}
+
 function formatDate(d: string | null | undefined): string {
   if (!d) return "-";
   return new Date(d).toLocaleDateString("en-GB");
@@ -163,10 +169,10 @@ export default function InvoicePage() {
         <div className="grid grid-cols-[1fr_300px] border-b border-black">
           {/* LOGO + COMPANY */}
           <div className="flex gap-4 p-4">
-            <div className="w-[72px] h-[72px] shrink-0 flex items-center justify-center">
+            <div className="w-[58px] h-[58px] shrink-0 flex items-center justify-center">
               {company.logo ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={company.logo} alt="logo" className="max-h-[72px] object-contain" />
+                <img src={company.logo} alt="logo" className="max-h-full max-w-full object-contain" />
               ) : (
                 <div className="text-center text-[9px] tracking-wide text-gray-500 border border-black w-full h-full flex items-center justify-center">
                   LOGO
@@ -317,9 +323,9 @@ export default function InvoicePage() {
             </tr>
 
             {/* blank filler rows so the sheet fills the page like a real invoice book */}
-            {Array.from({ length: 9 }).map((_, i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <tr key={i}>
-                <td className="border border-black h-[26px]" />
+                <td className="border border-black h-[20px]" />
                 <td className="border border-black" />
                 <td className="border border-black" />
                 <td className="border border-black" />
@@ -419,7 +425,7 @@ export default function InvoicePage() {
                   <>
                     <tr>
                       <td className="border-b border-black px-3 py-[6px]">
-                        CGST @{(sale.gstPercent / 2).toFixed(0)}%
+                        CGST @{formatPercent(sale.gstPercent / 2)}%
                       </td>
                       <td className="border-b border-black text-right px-3 py-[6px]">
                         ₹ {formatMoney(cgst)}
@@ -427,7 +433,7 @@ export default function InvoicePage() {
                     </tr>
                     <tr>
                       <td className="border-b border-black px-3 py-[6px]">
-                        SGST @{(sale.gstPercent / 2).toFixed(0)}%
+                        SGST @{formatPercent(sale.gstPercent / 2)}%
                       </td>
                       <td className="border-b border-black text-right px-3 py-[6px]">
                         ₹ {formatMoney(sgst)}
@@ -468,25 +474,17 @@ export default function InvoicePage() {
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col justify-end items-end px-3 py-3 min-h-[90px]">
-
-  {company.signature && (
-    <img
-      src={company.signature}
-      alt="Signature"
-      className="h-16 object-contain mb-2"
-    />
-  )}
-
-  <div className="font-bold">
-    Authorised Signatory
-  </div>
-
-  <div className="text-xs">
-    {company.companyName}
-  </div>
-
-</div>
+            <div className="flex-1 flex flex-col items-end justify-end px-3 py-2 text-[11.5px] font-bold min-h-[65px]">
+              {company.signature && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={company.signature}
+                  alt="Authorised signature"
+                  className="max-h-[34px] max-w-[130px] object-contain mb-1"
+                />
+              )}
+              Authorised Signature for {company.companyName}
+            </div>
           </div>
         </div>
 

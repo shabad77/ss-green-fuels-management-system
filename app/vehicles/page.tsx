@@ -86,10 +86,23 @@ export default function VehiclesPage() {
 
   return (
     <MainLayout>
-      <h1 className="text-4xl font-bold mb-6">Vehicle Master</h1>
+      <div className="mb-6">
+        <h1 className="text-[26px] font-bold text-slate-900 tracking-tight">
+          Vehicles
+        </h1>
+        <p className="text-[13.5px] text-slate-500 mt-0.5">
+          Manage vehicles used for deliveries and pickups
+        </p>
+      </div>
 
       {message && (
-        <div className="mb-5 rounded-lg border px-4 py-3 bg-green-50">
+        <div
+          className={`mb-6 rounded-lg px-4 py-3 text-[13.5px] font-medium border ${
+            message.startsWith("❌")
+              ? "bg-red-50 border-red-200 text-red-700"
+              : "bg-emerald-50 border-emerald-200 text-emerald-700"
+          }`}
+        >
           {message}
         </div>
       )}
@@ -139,7 +152,7 @@ export default function VehiclesPage() {
         </div>
       </Card>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <Card
           title="Vehicle List"
           headerRight={
@@ -152,58 +165,72 @@ export default function VehiclesPage() {
             </div>
           }
         >
-          <table className="w-full">
+          <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-green-700 text-white">
-                <th className="p-3">#</th>
-                <th className="p-3">Vehicle Number</th>
-                <th className="p-3">Owner</th>
-                <th className="p-3">Time Added</th>
-                <th className="p-3">Action</th>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500 w-14">#</th>
+                <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Vehicle Number</th>
+                <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Owner</th>
+                <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Time Added</th>
+                <th className="p-3 text-center text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Action</th>
               </tr>
             </thead>
 
             <tbody>
-              {vehicles
-                .filter((v) =>
+              {(() => {
+                const filtered = vehicles.filter((v) =>
                   (v.vehicleNumber + v.ownerName)
                     .toLowerCase()
                     .includes(search.toLowerCase())
-                )
-                .map((v, i) => (
+                );
+
+                if (filtered.length === 0) {
+                  return (
+                    <tr>
+                      <td colSpan={5} className="text-center p-10 text-slate-400 text-[13.5px]">
+                        No vehicles found
+                      </td>
+                    </tr>
+                  );
+                }
+
+                return filtered.map((v, i) => (
                   <tr
                     key={v.id}
-                    className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                    className="border-b border-slate-100 hover:bg-slate-50/70 text-[13.5px] text-slate-700"
                   >
-                    <td className="p-3 text-center">{i + 1}</td>
-                    <td className="p-3 text-center">{v.vehicleNumber}</td>
-                    <td className="p-3 text-center">{v.ownerName}</td>
-                    <td className="p-3 text-center">
+                    <td className="p-3 text-slate-400">{i + 1}</td>
+                    <td className="p-3 font-medium text-slate-800">{v.vehicleNumber}</td>
+                    <td className="p-3">{v.ownerName}</td>
+                    <td className="p-3 text-slate-500">
                       {new Date(v.createdAt).toLocaleString()}
                     </td>
                     <td className="p-3">
-                      <div className="flex justify-center gap-2">
+                      <div className="flex justify-center gap-1.5">
                         <button
-                          className="p-2 rounded bg-blue-100"
+                          className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors"
+                          title="Edit"
                           onClick={() => {
                             setEditingId(v.id);
                             setVehicleNumber(v.vehicleNumber);
                             setOwnerName(v.ownerName);
                           }}
                         >
-                          <Pencil size={18} />
+                          <Pencil size={15} />
                         </button>
 
                         <button
-                          className="p-2 rounded bg-red-100"
+                          className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
+                          title="Delete"
                           onClick={() => deleteVehicle(v.id)}
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ));
+              })()}
             </tbody>
           </table>
         </Card>

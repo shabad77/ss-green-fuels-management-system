@@ -67,6 +67,12 @@ model Sale {
 
   shipToAddress String?
 
+  itemName      String?
+
+  hsnCode       String?
+
+  unit          String?
+
   quantity      Float
 
   rate          Float
@@ -90,7 +96,7 @@ model Company {
 
   companyName         String
   gstNumber           String
-    panNumber       String?
+  panNumber           String?
   address             String
   city                String
   state               String

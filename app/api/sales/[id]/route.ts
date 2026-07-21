@@ -55,6 +55,12 @@ export async function PUT(
 
       shipToAddress: body.shipToAddress || null,
 
+      itemName: body.itemName || null,
+
+      hsnCode: body.hsnCode || null,
+
+      unit: body.unit || null,
+
       quantity: Number(body.quantity),
 
       rate: Number(body.rate),

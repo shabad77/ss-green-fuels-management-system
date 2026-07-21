@@ -27,6 +27,10 @@ type Sale = {
 
   shipToAddress: string | null;
 
+  itemName: string | null;
+
+  hsnCode: string | null;
+
   quantity: number;
 
   rate: number;
@@ -66,6 +70,8 @@ export default function SalesPage() {
   const [buyerId, setBuyerId] = useState<number | null>(null);
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [invoiceNo, setInvoiceNo] = useState("");
+  const [itemName, setItemName] = useState("");
+  const [hsnCode, setHsnCode] = useState("");
   const [quantity, setQuantity] = useState("");
   const [rate, setRate] = useState("");
   const [gstPercent, setGstPercent] = useState("5");
@@ -164,6 +170,10 @@ function editSale(sale: Sale) {
 
   setQuantity(String(sale.quantity));
 
+  setItemName(sale.itemName || "");
+
+  setHsnCode(sale.hsnCode || "");
+
   setRate(String(sale.rate));
 
   setGstPercent(String(sale.gstPercent));
@@ -183,6 +193,8 @@ function cancelEdit() {
   setShipToAddress("");
 
   setQuantity("");
+  setItemName("");
+  setHsnCode("");
   setRate("");
 }
 
@@ -222,6 +234,11 @@ async function deleteSale(id: number) {
     return;
   }
 
+  if (!itemName.trim()) {
+    alert("Enter item name.");
+    return;
+  }
+
   if (!quantity || Number(quantity) <= 0) {
     alert("Enter quantity.");
     return;
@@ -256,6 +273,10 @@ async function deleteSale(id: number) {
 
       shipToAddress,
 
+      itemName,
+
+      hsnCode,
+
       quantity,
 
       rate,
@@ -288,6 +309,8 @@ async function deleteSale(id: number) {
   setVehicleNo("");
   setEwayBillNo("");
   setShipToAddress("");
+  setItemName("");
+  setHsnCode("");
   setQuantity("");
   setRate("");
   setEditingId(null);
@@ -508,13 +531,14 @@ onFocus={() => setShowBuyerDropdown(true)}
 <div>
 
   <label className="block mb-2 text-[13px] font-medium text-slate-600">
-    Product
+    Product *
   </label>
 
   <input
-    readOnly
-    value="Sawdust Pellet"
-    className="w-full border border-slate-200 rounded-lg px-4 py-3 bg-slate-50 text-slate-500"
+    value={itemName}
+    onChange={(e) => setItemName(e.target.value)}
+    placeholder="e.g.  Sawdust Pellets"
+    className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
   />
 
 </div>
@@ -528,9 +552,10 @@ onFocus={() => setShowBuyerDropdown(true)}
   </label>
 
   <input
-    readOnly
-    value="4401"
-    className="w-full border border-slate-200 rounded-lg px-4 py-3 bg-slate-50 text-slate-500"
+    value={hsnCode}
+    onChange={(e) => setHsnCode(e.target.value)}
+    placeholder="4401"
+    className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
   />
 
 </div>
