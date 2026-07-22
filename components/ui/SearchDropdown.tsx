@@ -1,4 +1,8 @@
+
 "use client";
+
+import { useImperativeHandle } from "react";
+
 
 import {
   forwardRef,
@@ -24,9 +28,7 @@ type SearchDropdownProps<T> = {
 
   getLabel: (item: T) => string;
 
-  nextRef?: React.RefObject<
-    HTMLInputElement | HTMLSelectElement | HTMLButtonElement | null
-  >;
+  nextRef?: React.RefObject<HTMLElement | null>;
 };
 
 function SearchDropdownInner<T>(
@@ -48,6 +50,11 @@ function SearchDropdownInner<T>(
   const [highlightedIndex, setHighlightedIndex] = useState(0);
 
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+
+useImperativeHandle(ref, () => inputRef.current!, []);
+
 
   const filteredItems = items.filter((item) =>
     getLabel(item)
@@ -133,7 +140,7 @@ function SearchDropdownInner<T>(
     <div className="relative">
 
       <TextInput
-        ref={ref}
+        ref={inputRef}
         label={label}
         placeholder={placeholder}
         value={value}
@@ -148,7 +155,7 @@ function SearchDropdownInner<T>(
       {open && filteredItems.length > 0 && (
         <div
           ref={listRef}
-          className="absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-lg shadow-lg max-h-56 overflow-y-auto z-50 py-1"
+          className="absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-56 overflow-y-auto z-50"
         >
           {filteredItems.map((item, index) => (
             <div
@@ -164,10 +171,10 @@ function SearchDropdownInner<T>(
                   nextRef?.current?.focus();
                 }, 50);
               }}
-              className={`px-3.5 py-2 text-[13.5px] cursor-pointer ${
+              className={`px-4 py-2 cursor-pointer ${
                 highlightedIndex === index
-                  ? "bg-emerald-50 text-emerald-900"
-                  : "hover:bg-slate-50 text-slate-700"
+                  ? "bg-green-100"
+                  : "hover:bg-gray-100"
               }`}
             >
               {getLabel(item)}
