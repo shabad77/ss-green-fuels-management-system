@@ -410,7 +410,7 @@ onFocus={() => setShowBuyerDropdown(true)}
 
               setBuyerSearch(buyer.name);
 
-              setShipToAddress(buyer.address);
+              setShipToAddress(shipToAddress);
 
               setShowBuyerDropdown(false);
 

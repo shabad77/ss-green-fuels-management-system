@@ -29,8 +29,6 @@ export async function GET(request: Request) {
       "Invoice No": s.invoiceNo,
       "Date": s.invoiceDate.toLocaleDateString("en-GB"),
       "Buyer": s.buyer.name,
-      "Item": s.itemName || "",
-      "HSN": s.hsnCode || "",
       "Qty": s.quantity,
       "Rate": s.rate,
       "Taxable Amount": s.amount,

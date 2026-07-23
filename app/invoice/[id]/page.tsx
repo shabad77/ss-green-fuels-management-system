@@ -14,7 +14,7 @@ type Sale = {
   itemName?: string | null;
   hsnCode?: string | null;
   unit?: string | null; // e.g. "CFT", "PCS"
-
+  shipToAddress?: string | null;
   quantity: number;
   rate: number;
   amount: number; // taxable value (before tax)
@@ -185,7 +185,7 @@ export default function InvoicePage() {
                 <img
                   src={company.logo}
                   alt="logo"
-                  className="h-[85px] w-[85px] object-contain shrink-0"
+                  className="h-[120px] w-[120px] object-contain shrink-0"
                 />
               )}
 
@@ -442,7 +442,7 @@ export default function InvoicePage() {
                   <img
                     src={company.signature}
                     alt="Authorised signature"
-                    className="h-[56px] max-w-[170px] object-contain mb-1"
+                    className="h-[80px] max-w-[170px] object-contain mb-1"
                   />
                 ) : (
                   <div className="h-[56px]" />
