@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
+import SearchDropdown from "@/components/ui/SearchDropdown";
 import { Printer, Pencil, Trash2 } from "lucide-react";
 
 type Buyer = {
@@ -68,6 +69,7 @@ export default function SalesPage() {
 }
 
   const [buyerId, setBuyerId] = useState<number | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ name: string; role: "ADMIN" | "OPERATOR" | "ACCOUNTANT" } | null>(null);
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [invoiceNo, setInvoiceNo] = useState("");
   const [itemName, setItemName] = useState("");
@@ -80,6 +82,15 @@ export default function SalesPage() {
   const [buyerSearch, setBuyerSearch] = useState("");
   const [showBuyerDropdown, setShowBuyerDropdown] = useState(false);
   const [invoiceDate, setInvoiceDate] = useState(getToday());
+  const invoiceDateRef = useRef<HTMLInputElement>(null);
+  const buyerRef = useRef<HTMLInputElement>(null);
+  const vehicleNoRef = useRef<HTMLInputElement>(null);
+  const ewayBillNoRef = useRef<HTMLInputElement>(null);
+  const itemNameRef = useRef<HTMLInputElement>(null);
+  const hsnCodeRef = useRef<HTMLInputElement>(null);
+  const quantityRef = useRef<HTMLInputElement>(null);
+  const rateRef = useRef<HTMLInputElement>(null);
+  const gstPercentRef = useRef<HTMLInputElement>(null);
 
 const [vehicleNo, setVehicleNo] = useState("");
 
@@ -103,6 +114,11 @@ const selectedBuyer =
   setInvoiceDate(getToday());
   loadBuyers();
   loadSales();
+
+  fetch("/api/auth/me")
+    .then((res) => (res.ok ? res.json() : null))
+    .then(setCurrentUser)
+    .catch(() => setCurrentUser(null));
 }, []);
 
 useEffect(() => {
@@ -317,9 +333,6 @@ async function deleteSale(id: number) {
 
 }
 
-console.log("buyers =", buyers);
-console.log("showBuyerDropdown =", showBuyerDropdown);
-
   return (
   <MainLayout>
     <div className="mb-6">
@@ -331,6 +344,7 @@ console.log("showBuyerDropdown =", showBuyerDropdown);
       </p>
     </div>
 
+    {currentUser?.role !== "ACCOUNTANT" && (
     <Card title={editingId ? "Edit Sale" : "Add Sale"}>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -346,6 +360,12 @@ console.log("showBuyerDropdown =", showBuyerDropdown);
             type="text"
             value={invoiceNo}
             onChange={(e) => setInvoiceNo(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                invoiceDateRef.current?.focus();
+              }
+            }}
             placeholder="2026-27/001"
             className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
           />
@@ -359,9 +379,16 @@ console.log("showBuyerDropdown =", showBuyerDropdown);
           </label>
 
          <input
+  ref={invoiceDateRef}
   type="date"
   value={invoiceDate}
   onChange={(e) => setInvoiceDate(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      buyerRef.current?.focus();
+    }
+  }}
   className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
 />
         </div>
@@ -369,70 +396,21 @@ console.log("showBuyerDropdown =", showBuyerDropdown);
         {/* Buyer */}
 
 <div className="relative md:col-span-2">
-
-  <label className="block mb-2 text-[13px] font-medium text-slate-600">
-    Buyer *
-  </label>
-
-  <input
-    type="text"
+  <SearchDropdown
+    ref={buyerRef}
+    label="Buyer *"
     placeholder="Search Buyer..."
+    items={buyers}
     value={buyerSearch}
-
-onChange={(e) => {
-  setBuyerSearch(e.target.value);
-  setShowBuyerDropdown(true);
-}}
-
-onFocus={() => setShowBuyerDropdown(true)}
-    className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
+    onChange={setBuyerSearch}
+    getLabel={(buyer) => buyer.name}
+    nextRef={vehicleNoRef}
+    onSelect={(buyer) => {
+      setBuyerId(buyer.id);
+      setBuyerSearch(buyer.name);
+      setShipToAddress(buyer.address);
+    }}
   />
-
-  {showBuyerDropdown && (
-
-    <div className="absolute z-50 mt-1.5 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
-
-
-      {buyers
-        .filter((buyer) =>
-          buyer.name
-            .toLowerCase()
-            .includes(buyerSearch.toLowerCase())
-        )
-        .map((buyer) => (
-
-          <div
-            key={buyer.id}
-            className="cursor-pointer px-4 py-2.5 hover:bg-emerald-50 border-b border-slate-100 last:border-b-0"
-            onClick={() => {
-
-              setBuyerId(buyer.id);
-
-              setBuyerSearch(buyer.name);
-
-              setShipToAddress(shipToAddress);
-
-              setShowBuyerDropdown(false);
-
-            }}
-          >
-
-            <div className="text-[13.5px] font-semibold text-slate-800">
-              {buyer.name}
-            </div>
-
-            <div className="text-[12px] text-slate-500">
-              {buyer.gst || "No GST"}
-            </div>
-
-          </div>
-
-        ))}
-
-    </div>
-
-  )}
-
 </div>
 
 {/* Buyer Details */}
@@ -475,11 +453,18 @@ onFocus={() => setShowBuyerDropdown(true)}
           </label>
 
           <input
+  ref={vehicleNoRef}
   type="text"
   value={vehicleNo}
   onChange={(e) =>
     setVehicleNo(e.target.value.toUpperCase())
   }
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      ewayBillNoRef.current?.focus();
+    }
+  }}
   placeholder="RJ14 GB 1178"
   className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
 />
@@ -495,11 +480,18 @@ onFocus={() => setShowBuyerDropdown(true)}
           </label>
 
           <input
+  ref={ewayBillNoRef}
   type="text"
   value={ewayBillNo}
   onChange={(e) =>
     setEwayBillNo(e.target.value)
   }
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      itemNameRef.current?.focus();
+    }
+  }}
   placeholder="Optional"
   className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
 />
@@ -535,9 +527,16 @@ onFocus={() => setShowBuyerDropdown(true)}
   </label>
 
   <input
+    ref={itemNameRef}
     value={itemName}
     onChange={(e) => setItemName(e.target.value)}
-    placeholder="e.g.  Sawdust Pellets"
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        hsnCodeRef.current?.focus();
+      }
+    }}
+    placeholder="e.g. Biomass Pellets"
     className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
   />
 
@@ -552,8 +551,15 @@ onFocus={() => setShowBuyerDropdown(true)}
   </label>
 
   <input
+    ref={hsnCodeRef}
     value={hsnCode}
     onChange={(e) => setHsnCode(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        quantityRef.current?.focus();
+      }
+    }}
     placeholder="4401"
     className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
   />
@@ -569,9 +575,16 @@ onFocus={() => setShowBuyerDropdown(true)}
           </label>
 
           <input
+            ref={quantityRef}
             type="number"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                rateRef.current?.focus();
+              }
+            }}
             placeholder="18000"
             className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
           />
@@ -587,9 +600,16 @@ onFocus={() => setShowBuyerDropdown(true)}
           </label>
 
           <input
+            ref={rateRef}
             type="number"
             value={rate}
             onChange={(e) => setRate(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                gstPercentRef.current?.focus();
+              }
+            }}
             placeholder="8.25"
             className="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-shadow"
           />
@@ -605,9 +625,16 @@ onFocus={() => setShowBuyerDropdown(true)}
           </label>
 
           <input
+            ref={gstPercentRef}
             type="number"
             value={gstPercent}
             onChange={(e) => setGstPercent(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                saveSale();
+              }
+            }}
             className="w-full border border-slate-200 rounded-lg px-4 py-3 bg-slate-50 text-slate-500"
           />
 
@@ -670,6 +697,7 @@ onFocus={() => setShowBuyerDropdown(true)}
       </div>
 
     </Card>
+    )}
 
     <div className="mt-6">
 
@@ -770,6 +798,8 @@ onFocus={() => setShowBuyerDropdown(true)}
   <Printer size={15} />
 </button>
 
+                  {currentUser?.role !== "ACCOUNTANT" && (
+                  <>
                   <button
                     onClick={() => editSale(sale)}
                     className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors"
@@ -785,6 +815,8 @@ onFocus={() => setShowBuyerDropdown(true)}
                   >
                     <Trash2 size={15} />
                   </button>
+                  </>
+                  )}
 
                 </div>
 

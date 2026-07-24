@@ -1,5 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+
+async function requireAdmin() {
+  const actor = await getCurrentUser();
+
+  if (!actor || actor.role !== "ADMIN") {
+    return NextResponse.json(
+      { error: "Accountants have view-only access to sales." },
+      { status: 403 }
+    );
+  }
+
+  return null;
+}
 
 export async function GET() {
   try {
@@ -24,6 +38,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const body = await request.json();
 
@@ -62,17 +79,27 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(sale);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === "P2002" && error?.meta?.target?.includes("invoiceNo")) {
+      return NextResponse.json(
+        { error: "This invoice number is already in use. Please use a different one." },
+        { status: 409 }
+      );
+    }
+
     console.error(error);
 
     return NextResponse.json(
-      { error: String(error) },
+      { error: "Unable to save sale. Please try again." },
       { status: 500 }
     );
   }
 }
 
 export async function PUT(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const body = await request.json();
 

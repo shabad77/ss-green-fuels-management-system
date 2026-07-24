@@ -255,8 +255,8 @@ export default function InvoicePage() {
           <div className="border-t-2 border-slate-900" />
 
           {/* ================= BILL TO / SHIP TO ================= */}
-          <div className="grid grid-cols-2 gap-10 py-5 border-b border-slate-200">
-            <div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 py-5 border-b border-slate-200">
+              <div>
               <div
                 className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-400 pb-[3px] border-b-2 mb-2"
                 style={{ borderColor: BRAND }}
@@ -343,7 +343,7 @@ export default function InvoicePage() {
           <div className="flex-1 min-h-[40px]" />
 
           {/* ================= BOTTOM ================= */}
-          <div className="grid grid-cols-[1fr_290px] gap-10 pt-5 pb-6 border-t-2 border-slate-900">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_290px] gap-10 pt-5 pb-6 border-t-2 border-slate-900">
             {/* LEFT: BANK DETAILS + TERMS */}
             <div className="text-[11.5px]">
               {(company.bankName || company.accountNumber) && (

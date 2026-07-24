@@ -156,7 +156,7 @@ export default function VehiclesPage() {
         <Card
           title="Vehicle List"
           headerRight={
-            <div className="w-72">
+            <div className="w-full md:w-72">
               <TextInput
                 placeholder="Search..."
                 value={search}
@@ -165,7 +165,8 @@ export default function VehiclesPage() {
             </div>
           }
         >
-          <table className="w-full border-collapse">
+          <div className="overflow-x-auto">
+  <table className="min-w-[900px] w-full border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500 w-14">#</th>
@@ -233,6 +234,7 @@ export default function VehiclesPage() {
               })()}
             </tbody>
           </table>
+          </div>
         </Card>
       </div>
     </MainLayout>

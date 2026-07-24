@@ -20,6 +20,8 @@ useEffect(() => {
 async function loadDashboard() {
   const res = await fetch("/api/dashboard");
 
+  if (!res.ok) return;
+
   const data = await res.json();
 
   setStats(data);

@@ -255,7 +255,7 @@ export default function BuyersPage() {
         <Card
           title="Buyer List"
           headerRight={
-            <div className="w-72">
+            <div className="w-full md:w-72">
               <TextInput
                 placeholder="Search by name / mobile / GST..."
                 value={search}
@@ -264,7 +264,8 @@ export default function BuyersPage() {
             </div>
           }
         >
-          <table className="w-full border-collapse">
+          <div className="overflow-x-auto">
+            <table className="min-w-[900px] w-full border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500 w-14">
@@ -344,7 +345,8 @@ export default function BuyersPage() {
                 ))
               )}
             </tbody>
-          </table>
+            </table>
+          </div>  
         </Card>
       </div>
     </MainLayout>

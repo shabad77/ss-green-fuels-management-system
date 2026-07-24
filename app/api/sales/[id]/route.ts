@@ -1,5 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+
+async function requireAdmin() {
+  const actor = await getCurrentUser();
+
+  if (!actor || actor.role !== "ADMIN") {
+    return NextResponse.json(
+      { error: "Accountants have view-only access to sales." },
+      { status: 403 }
+    );
+  }
+
+  return null;
+}
 
 export async function GET(
   request: Request,
@@ -35,6 +49,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const body = await request.json();
   const { id } = await params;
 
@@ -82,6 +99,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
 
   await prisma.sale.delete({

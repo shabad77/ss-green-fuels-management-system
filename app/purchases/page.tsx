@@ -30,6 +30,7 @@ type Purchase = {
 };
 
 export default function PurchasesPage() {
+const [currentUser, setCurrentUser] = useState<{ name: string; role: "ADMIN" | "OPERATOR" | "ACCOUNTANT" } | null>(null);
 const [supplierId, setSupplierId] = useState<number | null>(null);
 const [vehicleId, setVehicleId] = useState<number | null>(null);
 const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
@@ -76,6 +77,10 @@ useEffect(() => {
   loadSuppliers();
   loadVehicles();
   loadPurchases();
+  fetch("/api/auth/me")
+    .then((res) => (res.ok ? res.json() : null))
+    .then(setCurrentUser)
+    .catch(() => setCurrentUser(null));
 }, []);
 const materialItems = materials.map((item) => ({
   id: item,
@@ -341,6 +346,7 @@ return (
   monthQuantity={monthQuantity}
 />
 
+{currentUser?.role !== "ACCOUNTANT" && (
 <Card title="Add Purchase">
   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
@@ -427,6 +433,7 @@ return (
 </div>
 </div>
 </Card>
+)}
 <div className="mt-8">
   <div className="mb-4">
   <div className="mb-5 flex items-end gap-3">
@@ -541,25 +548,50 @@ return (
 </td>
 
 <td className="p-3">
-  <div className="flex justify-center gap-1.5">
+  {(() => {
+    const isAdmin = currentUser?.role === "ADMIN";
+    const isOperator = currentUser?.role === "OPERATOR";
+    const ageMs = Date.now() - new Date(purchase.createdAt).getTime();
+    const withinWindow = ageMs <= 15 * 60 * 1000;
+    const canEdit = isAdmin || (isOperator && withinWindow);
 
-    <button
-  className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors"
-  onClick={() => editPurchase(purchase)}
-  title="Edit"
->
-  <Pencil size={15} />
-</button>
+    if (!canEdit) {
+      return (
+        <div className="flex justify-center">
+          <span
+            className="text-[11px] text-slate-400"
+            title={
+              isOperator
+                ? "Edit window has passed (15 minutes after adding)"
+                : "View only"
+            }
+          >
+            —
+          </span>
+        </div>
+      );
+    }
 
-    <button
-  className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
-  onClick={() => deletePurchase(purchase.id)}
-  title="Delete"
->
-  <Trash2 size={15} />
-</button>
+    return (
+      <div className="flex justify-center gap-1.5">
+        <button
+          className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors"
+          onClick={() => editPurchase(purchase)}
+          title="Edit"
+        >
+          <Pencil size={15} />
+        </button>
 
-  </div>
+        <button
+          className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
+          onClick={() => deletePurchase(purchase.id)}
+          title="Delete"
+        >
+          <Trash2 size={15} />
+        </button>
+      </div>
+    );
+  })()}
 </td>
 
             </tr>

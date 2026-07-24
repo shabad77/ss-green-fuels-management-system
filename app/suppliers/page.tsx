@@ -231,7 +231,7 @@ setTimeout(() => {
         <Card
   title="Supplier List"
   headerRight={
-    <div className="w-70">
+    <div className="w-full md:w-72">
       <TextInput
         placeholder="🔍 Search supplier..."
         value={search}
@@ -241,7 +241,8 @@ setTimeout(() => {
   }
 >
 
-          <table className="w-full">
+          <div className="overflow-x-auto">
+            <table className="min-w-[900px] w-full border-collapse">
 
             <thead className="sticky top-0">
 
@@ -340,6 +341,7 @@ setTimeout(() => {
             </tbody>
 
           </table>
+        </div>
 
         </Card>
 

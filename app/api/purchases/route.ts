@@ -1,18 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-
-type PurchaseWithRelations = {
-  id: number;
-  material: string;
-  quantity: number;
-  createdAt: Date;
-  supplier: {
-    name: string;
-  };
-  vehicle: {
-    vehicleNumber: string;
-  };
-};
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET() {
   const purchases = await prisma.purchase.findMany({
@@ -26,7 +14,7 @@ export async function GET() {
   });
 
   return NextResponse.json(
-    purchases.map((purchase: PurchaseWithRelations) => ({
+    purchases.map((purchase) => ({
       id: purchase.id,
       supplierName: purchase.supplier.name,
       vehicleNumber: purchase.vehicle.vehicleNumber,
@@ -38,6 +26,18 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const actor = await getCurrentUser();
+
+  // Middleware gates by URL path only, not HTTP method — an Accountant can
+  // reach /api/purchases (they need GET for viewing/exporting), so writes
+  // must be explicitly re-checked here or a read-only role could POST.
+  if (!actor || (actor.role !== "ADMIN" && actor.role !== "OPERATOR")) {
+    return NextResponse.json(
+      { error: "You don't have permission to add purchases." },
+      { status: 403 }
+    );
+  }
+
   const body = await request.json();
 
   const purchase = await prisma.purchase.create({
