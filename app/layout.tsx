@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "SS Green Fuels ERP",
   description: "SS Green Fuels Management System",
+  icons: {apple: "/apple-icon.png", },
 };
 
 export default function RootLayout({
