@@ -25,18 +25,21 @@
     position: absolute;
     left: 0;
     top: 0;
-    /* Match the printable area exactly: A4 (210mm x 297mm) minus the
-       8mm @page margin on every side. Without this, the on-screen
-       min-height of 297mm exceeds the printable area and the tail
-       of the invoice (signature line) spills onto a second page. */
+    /* Match the printable width exactly: A4 (210mm) minus the 8mm
+       @page margin on each side. min-height (not a fixed height) keeps
+       the sheet looking full when content is short, without forcing
+       content taller than this to overflow silently — a fixed height
+       doesn't clip overflowing content by default, it just spills onto
+       a 2nd page while looking like it "fit" in this rule. The real
+       fix for page overflow is trimming content height in page.tsx.
+    */
     width: 194mm !important;
     min-height: 281mm !important;
-    height: 281mm !important;
     border: none !important;
     box-shadow: none !important;
   }
 
-  .print\:hidden {
+  .print\\:hidden {
     display: none !important;
   }
 

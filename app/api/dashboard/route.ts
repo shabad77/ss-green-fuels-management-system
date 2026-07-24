@@ -3,18 +3,22 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const today = new Date();
+    // "Today" must always mean the IST calendar day, regardless of what
+    // timezone the server process itself runs in — locally that's IST
+    // (so this happened to work by accident), but Vercel's servers run
+    // in UTC, where "midnight" is 5.5 hours behind real IST midnight.
+    // Using getFullYear()/getMonth()/getDate() ties the boundary to the
+    // server's own timezone; computing it via a fixed UTC+5:30 offset
+    // makes it correct everywhere.
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const istNow = new Date(Date.now() + IST_OFFSET_MS);
 
     const startOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
+      Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate()) - IST_OFFSET_MS
     );
 
     const endOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() + 1
+      Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate() + 1) - IST_OFFSET_MS
     );
 
     const [

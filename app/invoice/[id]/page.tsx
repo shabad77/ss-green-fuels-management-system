@@ -10,11 +10,12 @@ type Sale = {
   dueDate?: string | null;
   vehicleNo: string;
   ewayBillNo: string | null;
+  shipToAddress?: string | null;
 
   itemName?: string | null;
   hsnCode?: string | null;
   unit?: string | null; // e.g. "CFT", "PCS"
-  shipToAddress?: string | null;
+
   quantity: number;
   rate: number;
   amount: number; // taxable value (before tax)
@@ -164,7 +165,7 @@ export default function InvoicePage() {
 
   return (
     <div
-      className="bg-[#e9e9e9] min-h-screen py-8 print:bg-white print:py-0"
+      className="bg-[#e9e9e9] min-h-screen py-8 print:bg-white print:py-0 print:min-h-0"
       style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
     >
       <div
@@ -175,7 +176,7 @@ export default function InvoicePage() {
         {/* Top accent bar */}
         <div className="h-[6px] w-full" style={{ backgroundColor: BRAND }} />
 
-        <div className="flex-1 flex flex-col px-10 pt-7">
+        <div className="flex-1 flex flex-col px-10 pt-6">
           {/* ================= HEADER ================= */}
           <div className="flex justify-between items-start gap-6 pb-5">
             {/* LOGO + COMPANY */}
@@ -185,7 +186,7 @@ export default function InvoicePage() {
                 <img
                   src={company.logo}
                   alt="logo"
-                  className="h-[120px] w-[120px] object-contain shrink-0"
+                  className="h-[80px] w-[80px] object-contain shrink-0"
                 />
               )}
 
@@ -255,8 +256,8 @@ export default function InvoicePage() {
           <div className="border-t-2 border-slate-900" />
 
           {/* ================= BILL TO / SHIP TO ================= */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 py-5 border-b border-slate-200">
-              <div>
+          <div className="grid grid-cols-2 gap-10 py-5 border-b border-slate-200">
+            <div>
               <div
                 className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-400 pb-[3px] border-b-2 mb-2"
                 style={{ borderColor: BRAND }}
@@ -340,10 +341,10 @@ export default function InvoicePage() {
           </table>
 
           {/* spacer to keep the sheet visually balanced without an empty grid */}
-          <div className="flex-1 min-h-[40px]" />
+          <div className="flex-1 min-h-[16px]" />
 
           {/* ================= BOTTOM ================= */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_290px] gap-10 pt-5 pb-6 border-t-2 border-slate-900">
+          <div id="invoice-bottom-block" className="grid grid-cols-[1fr_290px] gap-10 pt-4 pb-5 border-t-2 border-slate-900">
             {/* LEFT: BANK DETAILS + TERMS */}
             <div className="text-[11.5px]">
               {(company.bankName || company.accountNumber) && (
@@ -385,7 +386,7 @@ export default function InvoicePage() {
 
             {/* RIGHT: TOTALS */}
             <div>
-              <div className="space-y-[7px] text-[11.5px]">
+              <div className="space-y-[5px] text-[11.5px]">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Taxable Amount</span>
                   <span className="text-slate-800">₹ {formatMoney(sale.amount)}</span>
@@ -436,13 +437,13 @@ export default function InvoicePage() {
                 {numberToWordsIndian(sale.total)} Rupees Only
               </div>
 
-              <div className="mt-8 flex flex-col items-end">
+              <div className="mt-5 flex flex-col items-end">
                 {company.signature ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={company.signature}
                     alt="Authorised signature"
-                    className="h-[80px] max-w-[170px] object-contain mb-1"
+                    className="h-[70px] max-w-[170px] object-contain mb-1"
                   />
                 ) : (
                   <div className="h-[56px]" />

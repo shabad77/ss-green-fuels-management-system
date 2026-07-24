@@ -436,8 +436,7 @@ return (
 )}
 <div className="mt-8">
   <div className="mb-4">
-  <div className="mb-5 flex items-end gap-3">
-
+<div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end">
   <div className="flex-1">
     <TextInput
       placeholder="Search Supplier / Vehicle / Material / Quantity..."
@@ -446,8 +445,7 @@ return (
     />
   </div>
 
-  <div className="flex gap-2 flex-wrap">
-
+<div className="grid grid-cols-2 gap-2 md:flex">
   {(
     [
       { key: "all", label: "All" },
@@ -492,7 +490,8 @@ return (
 </div>
   <Card title="Purchase List">
 
-    <table className="w-full border-collapse">
+    <div className="overflow-x-auto">
+  <table className="min-w-[850px] w-full border-collapse">
 
       <thead>
   <tr className="bg-slate-50 border-b border-slate-200">
@@ -603,7 +602,7 @@ return (
       </tbody>
 
     </table>
-
+  </div>
   </Card>
 </div>
 

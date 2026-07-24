@@ -196,7 +196,8 @@ export default function UsersPage() {
 
       <div className="mt-6">
         <Card title="Team">
-          <table className="w-full border-collapse">
+          <div className="overflow-x-auto">
+  <table className="min-w-[900px] w-full border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">
@@ -266,6 +267,7 @@ export default function UsersPage() {
               )}
             </tbody>
           </table>
+          </div>
         </Card>
       </div>
     </MainLayout>
