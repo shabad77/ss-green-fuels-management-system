@@ -71,6 +71,7 @@ const materials = [
   "Semal",
   "Neem",
   "Firewood",
+  "Mix Wood"
 ];
 
 useEffect(() => {
