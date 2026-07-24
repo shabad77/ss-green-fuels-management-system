@@ -17,7 +17,7 @@ const encoder = new TextEncoder();
 async function getKey() {
   return crypto.subtle.importKey(
     "raw",
-    encoder.encode(SECRET),
+    encoder.encode(SECRET) as BufferSource,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign", "verify"]
@@ -48,7 +48,7 @@ export async function createSessionToken(
   const full: SessionPayload = { ...payload, exp };
   const data = toBase64Url(encoder.encode(JSON.stringify(full)));
   const key = await getKey();
-  const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
+  const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(data) as BufferSource);
   return `${data}.${toBase64Url(sig)}`;
 }
 
@@ -65,8 +65,8 @@ export async function verifySessionToken(
     const valid = await crypto.subtle.verify(
       "HMAC",
       key,
-      fromBase64Url(sig),
-      encoder.encode(data)
+      fromBase64Url(sig) as BufferSource,
+      encoder.encode(data) as BufferSource
     );
 
     if (!valid) return null;
