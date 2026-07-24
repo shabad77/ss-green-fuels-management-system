@@ -359,6 +359,7 @@ export default function InvoicePage() {
                     {company.accountName && <div>{company.accountName}</div>}
                     {company.accountNumber && <div>A/C: {company.accountNumber}</div>}
                     {company.ifscCode && <div>IFSC: {company.ifscCode}</div>}
+                    {company.upiId && <div>UPI: {company.upiId}</div>}
                     {(company.bankName || company.branch) && (
                       <div>
                         {company.bankName}

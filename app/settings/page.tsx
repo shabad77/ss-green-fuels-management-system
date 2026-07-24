@@ -114,6 +114,12 @@ export default function SettingsPage() {
   const [pincode, setPincode] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [ifscCode, setIfscCode] = useState("");
+  const [branch, setBranch] = useState("");
+  const [upiId, setUpiId] = useState("");
   const [logo, setLogo] = useState("");
   const [signature, setSignature] = useState("");
   const [message, setMessage] = useState("");
@@ -135,6 +141,12 @@ export default function SettingsPage() {
     setPincode(data.pincode);
     setPhone(data.phone || "");
     setEmail(data.email || "");
+    setBankName(data.bankName || "");
+    setAccountName(data.accountName || "");
+    setAccountNumber(data.accountNumber || "");
+    setIfscCode(data.ifscCode || "");
+    setBranch(data.branch || "");
+    setUpiId(data.upiId || "");
     setLogo(data.logo || "");
     setSignature(data.signature || "");
   }
@@ -163,6 +175,12 @@ export default function SettingsPage() {
         email,
         logo,
         signature,
+        bankName,
+        accountName,
+        accountNumber,
+        ifscCode,
+        branch,
+        upiId,
       }),
     });
 
@@ -304,6 +322,80 @@ export default function SettingsPage() {
           </div>
         </div>
       </Card>
+
+      <div className="mt-6">
+  <Card title="Bank Details">
+    <div className="space-y-5">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label className={labelClasses}>Bank Name</label>
+          <input
+            type="text"
+            value={bankName}
+            onChange={(e) => setBankName(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
+
+        <div>
+          <label className={labelClasses}>Account Name</label>
+          <input
+            type="text"
+            value={accountName}
+            onChange={(e) => setAccountName(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label className={labelClasses}>Account Number</label>
+          <input
+            type="text"
+            value={accountNumber}
+            onChange={(e) => setAccountNumber(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
+
+        <div>
+          <label className={labelClasses}>IFSC Code</label>
+          <input
+            type="text"
+            value={ifscCode}
+            onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
+            className={inputClasses}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label className={labelClasses}>Branch</label>
+          <input
+            type="text"
+            value={branch}
+            onChange={(e) => setBranch(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
+
+        <div>
+          <label className={labelClasses}>UPI ID</label>
+          <input
+            type="text"
+            value={upiId}
+            onChange={(e) => setUpiId(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
+      </div>
+
+    </div>
+  </Card>
+</div>
 
       <div className="mt-6">
         <Card title="Branding">

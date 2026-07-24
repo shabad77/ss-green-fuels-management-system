@@ -99,7 +99,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-[12px] text-slate-400 mt-6">
-          SS Green Fuels © 2026 &middot; Version 0.2
+          SS Green Fuels © 2026 &middot; Version 1.0
         </p>
       </div>
     </main>
