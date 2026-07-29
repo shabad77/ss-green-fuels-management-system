@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import html2canvas from "html2canvas-pro";
+import jsPDF from "jspdf";
 import "../invoice.css";
 
 type Sale = {
@@ -123,6 +125,9 @@ const BRAND = "#0f5132";
 export default function InvoicePage() {
   const { id } = useParams();
   const [sale, setSale] = useState<Sale | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadInvoice();
@@ -136,6 +141,54 @@ export default function InvoicePage() {
 
     if (typeof document !== "undefined") {
       document.title = `Invoice ${data.sale.invoiceNo} - ${data.company.companyName}`;
+    }
+  }
+
+  async function downloadPdf() {
+    if (!invoiceRef.current || !sale) return;
+
+    setDownloading(true);
+
+    const element = invoiceRef.current;
+
+    // The on-screen page has a drop shadow for visual polish — strip it
+    // before capture so it doesn't get baked into the flat PDF page.
+    const originalShadow = element.style.boxShadow;
+    element.style.boxShadow = "none";
+
+    const originalActionsDisplay = actionsRef.current?.style.display ?? "";
+    if (actionsRef.current) actionsRef.current.style.display = "none";
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2, // render at 2x for crisp text in the PDF
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+
+      const filename = `Invoice-${sale.invoiceNo.replace(/[\/\\]/g, "-")}.pdf`;
+      pdf.save(filename);
+    } catch (error) {
+      console.error(error);
+      alert("Unable to generate the PDF. Please try again, or use Print instead.");
+    } finally {
+      element.style.boxShadow = originalShadow;
+      if (actionsRef.current) actionsRef.current.style.display = originalActionsDisplay;
+      setDownloading(false);
     }
   }
 
@@ -170,6 +223,7 @@ export default function InvoicePage() {
     >
       <div
         id="invoice"
+        ref={invoiceRef}
         className="w-[210mm] min-h-[297mm] mx-auto bg-white text-[12px] text-slate-800 flex flex-col shadow-[0_2px_16px_rgba(0,0,0,0.15)] print:shadow-none"
         style={{ fontVariantNumeric: "tabular-nums" }}
       >
@@ -464,8 +518,17 @@ export default function InvoicePage() {
           </div>
         </div>
 
-        {/* PRINT */}
-        <div className="print:hidden mt-5 mx-10 mb-6 flex justify-end">
+        {/* PRINT / DOWNLOAD */}
+        <div id="invoice-actions" ref={actionsRef} className="print:hidden mt-5 mx-10 mb-6 flex justify-end gap-3">
+          <button
+            onClick={downloadPdf}
+            disabled={downloading}
+            className="border px-6 py-3 rounded font-semibold transition-opacity disabled:opacity-60"
+            style={{ borderColor: BRAND, color: BRAND }}
+          >
+            {downloading ? "Generating..." : "⬇ Download PDF"}
+          </button>
+
           <button
             onClick={() => window.print()}
             className="text-white px-6 py-3 rounded font-semibold"
