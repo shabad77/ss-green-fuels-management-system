@@ -21,21 +21,45 @@ export async function GET(request: Request) {
           lt: end,
         },
       },
-      include: { buyer: true },
+      include: { buyer: true, items: true },
       orderBy: { invoiceDate: "asc" },
     });
 
-    const rows = sales.map((s) => ({
-      "Invoice No": s.invoiceNo,
-      "Date": s.invoiceDate.toLocaleDateString("en-GB"),
-      "Buyer": s.buyer.name,
-      "Qty": s.quantity,
-      "Rate": s.rate,
-      "Taxable Amount": s.amount,
-      "GST %": s.gstPercent,
-      "GST Amount": s.gstAmount,
-      "Total": s.total,
-    }));
+    // One row per item — a multi-item sale produces multiple report
+    // rows, one per line item, rather than a single confusing aggregate
+    // row. Older sales with no items rows fall back to a single row
+    // built from the legacy scalar fields on Sale itself.
+    const rows = sales.flatMap((s) => {
+      const lineItems =
+        s.items.length > 0
+          ? s.items
+          : [
+              {
+                itemName: s.itemName ?? "Item",
+                hsnCode: s.hsnCode,
+                quantity: s.quantity,
+                rate: s.rate,
+                amount: s.amount,
+                gstPercent: s.gstPercent,
+                gstAmount: s.gstAmount,
+                total: s.total,
+              },
+            ];
+
+      return lineItems.map((item) => ({
+        "Invoice No": s.invoiceNo,
+        "Date": s.invoiceDate.toLocaleDateString("en-GB"),
+        "Buyer": s.buyer.name,
+        "Item": item.itemName,
+        "HSN": item.hsnCode || "",
+        "Qty": item.quantity,
+        "Rate": item.rate,
+        "Taxable Amount": item.amount,
+        "GST %": item.gstPercent,
+        "GST Amount": item.gstAmount,
+        "Total": item.total,
+      }));
+    });
 
     const totalsRow = {
       "Invoice No": "",
