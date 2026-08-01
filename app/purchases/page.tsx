@@ -552,7 +552,7 @@ return (
     const isAdmin = currentUser?.role === "ADMIN";
     const isOperator = currentUser?.role === "OPERATOR";
     const ageMs = Date.now() - new Date(purchase.createdAt).getTime();
-    const withinWindow = ageMs <= 15 * 60 * 1000;
+    const withinWindow = ageMs <= 3 * 60 * 1000;
     const canEdit = isAdmin || (isOperator && withinWindow);
 
     if (!canEdit) {

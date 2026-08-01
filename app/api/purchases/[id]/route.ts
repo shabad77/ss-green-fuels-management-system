@@ -8,7 +8,7 @@ type Params = {
   }>;
 };
 
-const OPERATOR_EDIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const OPERATOR_EDIT_WINDOW_MS = 3 * 60 * 1000; // 3 minutes
 
 async function checkWriteAccess(id: number) {
   const actor = await getCurrentUser();
