@@ -103,6 +103,28 @@ model Sale {
   createdAt     DateTime @default(now())
 
   buyer Buyer @relation(fields: [buyerId], references: [id])
+  items SaleItem[]
+}
+
+model SaleItem {
+  id         Int    @id @default(autoincrement())
+
+  saleId     Int
+
+  itemName   String
+  hsnCode    String?
+  unit       String?
+
+  quantity   Float
+  rate       Float
+  amount     Float
+
+  gstPercent Float
+  gstAmount  Float
+
+  total      Float
+
+  sale Sale @relation(fields: [saleId], references: [id], onDelete: Cascade)
 }
 
 

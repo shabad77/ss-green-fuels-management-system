@@ -15,11 +15,75 @@ async function requireAdmin() {
   return null;
 }
 
+type ItemInput = {
+  itemName: string;
+  hsnCode?: string | null;
+  unit?: string | null;
+  quantity: number | string;
+  rate: number | string;
+  gstPercent: number | string;
+};
+
+// Computes each item's amount/gstAmount/total server-side, plus the
+// sale-level aggregates (sum across all items) — the single source of
+// truth for these numbers, rather than trusting client-side math.
+function buildItemsAndAggregates(rawItems: ItemInput[]) {
+  const items = rawItems.map((item) => {
+    const quantity = Number(item.quantity);
+    const rate = Number(item.rate);
+    const gstPercent = Number(item.gstPercent);
+    const amount = quantity * rate;
+    const gstAmount = (amount * gstPercent) / 100;
+    const total = amount + gstAmount;
+
+    return {
+      itemName: item.itemName,
+      hsnCode: item.hsnCode || null,
+      unit: item.unit || null,
+      quantity,
+      rate,
+      amount,
+      gstPercent,
+      gstAmount,
+      total,
+    };
+  });
+
+  const aggregate = items.reduce(
+    (acc, item) => ({
+      quantity: acc.quantity + item.quantity,
+      amount: acc.amount + item.amount,
+      gstAmount: acc.gstAmount + item.gstAmount,
+      total: acc.total + item.total,
+    }),
+    { quantity: 0, amount: 0, gstAmount: 0, total: 0 }
+  );
+
+  // Legacy scalar fields on Sale (itemName/hsnCode/unit/rate/gstPercent)
+  // don't have a single well-defined value once there's more than one
+  // item — fall back to the first item's values, which keeps any
+  // single-item sale (still the common case) looking exactly as before.
+  const first = items[0];
+  const itemNameLabel =
+    items.length > 1 ? `${first.itemName} +${items.length - 1} more` : first.itemName;
+
+  return {
+    items,
+    itemName: itemNameLabel,
+    hsnCode: first.hsnCode,
+    unit: first.unit,
+    rate: items.length === 1 ? first.rate : 0,
+    gstPercent: items.length === 1 ? first.gstPercent : 0,
+    ...aggregate,
+  };
+}
+
 export async function GET() {
   try {
     const sales = await prisma.sale.findMany({
       include: {
         buyer: true,
+        items: true,
       },
       orderBy: {
         id: "desc",
@@ -44,38 +108,39 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    if (!Array.isArray(body.items) || body.items.length === 0) {
+      return NextResponse.json(
+        { error: "At least one item is required." },
+        { status: 400 }
+      );
+    }
+
+    const built = buildItemsAndAggregates(body.items);
+
     const sale = await prisma.sale.create({
       data: {
         buyerId: Number(body.buyerId),
-
         invoiceNo: body.invoiceNo,
-
         invoiceDate: new Date(body.invoiceDate),
-
         vehicleNo: body.vehicleNo,
-
         ewayBillNo: body.ewayBillNo || null,
-
         shipToAddress: body.shipToAddress || null,
 
-        itemName: body.itemName || null,
+        itemName: built.itemName,
+        hsnCode: built.hsnCode,
+        unit: built.unit,
+        quantity: built.quantity,
+        rate: built.rate,
+        amount: built.amount,
+        gstPercent: built.gstPercent,
+        gstAmount: built.gstAmount,
+        total: built.total,
 
-        hsnCode: body.hsnCode || null,
-
-        unit: body.unit || null,
-
-        quantity: Number(body.quantity),
-
-        rate: Number(body.rate),
-
-        amount: Number(body.amount),
-
-        gstPercent: Number(body.gstPercent),
-
-        gstAmount: Number(body.gstAmount),
-
-        total: Number(body.total),
+        items: {
+          create: built.items,
+        },
       },
+      include: { items: true },
     });
 
     return NextResponse.json(sale);
@@ -103,6 +168,15 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json();
 
+    if (!Array.isArray(body.items) || body.items.length === 0) {
+      return NextResponse.json(
+        { error: "At least one item is required." },
+        { status: 400 }
+      );
+    }
+
+    const built = buildItemsAndAggregates(body.items);
+
     const sale = await prisma.sale.update({
       where: {
         id: Number(body.id),
@@ -115,19 +189,24 @@ export async function PUT(request: Request) {
         ewayBillNo: body.ewayBillNo || null,
         shipToAddress: body.shipToAddress || null,
 
-        itemName: body.itemName || null,
+        itemName: built.itemName,
+        hsnCode: built.hsnCode,
+        unit: built.unit,
+        quantity: built.quantity,
+        rate: built.rate,
+        amount: built.amount,
+        gstPercent: built.gstPercent,
+        gstAmount: built.gstAmount,
+        total: built.total,
 
-        hsnCode: body.hsnCode || null,
-
-        unit: body.unit || null,
-
-        quantity: Number(body.quantity),
-        rate: Number(body.rate),
-        amount: Number(body.amount),
-        gstPercent: Number(body.gstPercent),
-        gstAmount: Number(body.gstAmount),
-        total: Number(body.total),
+        // Replace the whole item set on every edit — simplest correct
+        // semantics for a form that resubmits the full item list.
+        items: {
+          deleteMany: {},
+          create: built.items,
+        },
       },
+      include: { items: true },
     });
 
     return NextResponse.json(sale);

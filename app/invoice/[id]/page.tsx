@@ -6,6 +6,18 @@ import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 import "../invoice.css";
 
+type SaleItem = {
+  itemName: string;
+  hsnCode: string | null;
+  unit?: string | null;
+  quantity: number;
+  rate: number;
+  amount: number;
+  gstPercent: number;
+  gstAmount: number;
+  total: number;
+};
+
 type Sale = {
   invoiceNo: string;
   invoiceDate: string;
@@ -17,6 +29,9 @@ type Sale = {
   itemName?: string | null;
   hsnCode?: string | null;
   unit?: string | null; // e.g. "CFT", "PCS"
+
+  items?: SaleItem[]; // multi-item breakdown; falls back to the legacy
+                       // single-item fields below for older invoices
 
   quantity: number;
   rate: number;
@@ -198,10 +213,42 @@ export default function InvoicePage() {
 
   const { company, buyer } = sale;
 
+  // Multi-item invoices use sale.items; older invoices created before
+  // this feature existed have no items rows, so fall back to a single
+  // synthetic line built from the legacy scalar fields on Sale itself.
+  const lineItems: SaleItem[] =
+    sale.items && sale.items.length > 0
+      ? sale.items
+      : [
+          {
+            itemName: sale.itemName ?? "Item",
+            hsnCode: sale.hsnCode ?? null,
+            unit: sale.unit ?? null,
+            quantity: sale.quantity,
+            rate: sale.rate,
+            amount: sale.amount,
+            gstPercent: sale.gstPercent,
+            gstAmount: sale.gstAmount,
+            total: sale.total,
+          },
+        ];
+
   const isInterState = !!sale.isInterState;
-  const cgst = isInterState ? 0 : sale.gstAmount / 2;
-  const sgst = isInterState ? 0 : sale.gstAmount / 2;
-  const igst = isInterState ? sale.gstAmount : 0;
+
+  // Group tax by GST rate across all items — a multi-item invoice can
+  // mix rates (e.g. one item at 5%, another at 12%), so each distinct
+  // rate present gets its own CGST/SGST (or IGST) line in the totals.
+  const gstGroups = Object.values(
+    lineItems.reduce<Record<string, { gstPercent: number; gstAmount: number }>>(
+      (acc, item) => {
+        const key = String(item.gstPercent);
+        if (!acc[key]) acc[key] = { gstPercent: item.gstPercent, gstAmount: 0 };
+        acc[key].gstAmount += item.gstAmount;
+        return acc;
+      },
+      {}
+    )
+  ).sort((a, b) => a.gstPercent - b.gstPercent);
 
   const roundOff = sale.roundOff ?? sale.total - (sale.amount + sale.gstAmount);
   const receivedAmount = sale.receivedAmount ?? 0;
@@ -365,21 +412,23 @@ export default function InvoicePage() {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-slate-100">
-                <td className="py-3 text-slate-400">1</td>
-                <td className="py-3 font-semibold text-slate-800">{sale.itemName ?? "Item"}</td>
-                <td className="py-3 text-center text-slate-500">{sale.hsnCode ?? "-"}</td>
-                <td className="py-3 text-right text-slate-700">
-                  {sale.quantity.toLocaleString("en-IN")}
-                  {sale.unit ? ` ${sale.unit}` : ""}
-                </td>
-                <td className="py-3 text-right text-slate-700">{sale.rate.toLocaleString("en-IN")}</td>
-                <td className="py-3 text-right text-slate-700">
-                  {formatMoney(sale.gstAmount)}
-                  <div className="text-[9.5px] text-slate-400">({sale.gstPercent}%)</div>
-                </td>
-                <td className="py-3 text-right font-semibold text-slate-900">{formatMoney(sale.amount)}</td>
-              </tr>
+              {lineItems.map((item, i) => (
+                <tr key={i} className="border-b border-slate-100">
+                  <td className="py-3 text-slate-400">{i + 1}</td>
+                  <td className="py-3 font-semibold text-slate-800">{item.itemName ?? "Item"}</td>
+                  <td className="py-3 text-center text-slate-500">{item.hsnCode ?? "-"}</td>
+                  <td className="py-3 text-right text-slate-700">
+                    {item.quantity.toLocaleString("en-IN")}
+                    {item.unit ? ` ${item.unit}` : ""}
+                  </td>
+                  <td className="py-3 text-right text-slate-700">{item.rate.toLocaleString("en-IN")}</td>
+                  <td className="py-3 text-right text-slate-700">
+                    {formatMoney(item.gstAmount)}
+                    <div className="text-[9.5px] text-slate-400">({item.gstPercent}%)</div>
+                  </td>
+                  <td className="py-3 text-right font-semibold text-slate-900">{formatMoney(item.amount)}</td>
+                </tr>
+              ))}
             </tbody>
             <tfoot>
               <tr className="border-t-2 border-slate-900 font-bold">
@@ -448,21 +497,25 @@ export default function InvoicePage() {
                 </div>
 
                 {isInterState ? (
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">IGST @{sale.gstPercent}%</span>
-                    <span className="text-slate-800">₹ {formatMoney(igst)}</span>
-                  </div>
+                  gstGroups.map((group) => (
+                    <div key={group.gstPercent} className="flex justify-between">
+                      <span className="text-slate-500">IGST @{formatPercent(group.gstPercent)}%</span>
+                      <span className="text-slate-800">₹ {formatMoney(group.gstAmount)}</span>
+                    </div>
+                  ))
                 ) : (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">CGST @{formatPercent(sale.gstPercent / 2)}%</span>
-                      <span className="text-slate-800">₹ {formatMoney(cgst)}</span>
+                  gstGroups.map((group) => (
+                    <div key={group.gstPercent}>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">CGST @{formatPercent(group.gstPercent / 2)}%</span>
+                        <span className="text-slate-800">₹ {formatMoney(group.gstAmount / 2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">SGST @{formatPercent(group.gstPercent / 2)}%</span>
+                        <span className="text-slate-800">₹ {formatMoney(group.gstAmount / 2)}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">SGST @{formatPercent(sale.gstPercent / 2)}%</span>
-                      <span className="text-slate-800">₹ {formatMoney(sgst)}</span>
-                    </div>
-                  </>
+                  ))
                 )}
 
                 <div className="flex justify-between">
