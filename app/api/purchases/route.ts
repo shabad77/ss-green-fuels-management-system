@@ -7,6 +7,7 @@ export async function GET() {
     include: {
       supplier: true,
       vehicle: true,
+      createdBy: true,
     },
     orderBy: {
       id: "desc",
@@ -21,6 +22,7 @@ export async function GET() {
       material: purchase.material,
       quantity: purchase.quantity,
       createdAt: purchase.createdAt,
+      createdByName: purchase.createdBy?.name ?? null,
     }))
   );
 }
@@ -46,6 +48,7 @@ export async function POST(request: Request) {
       vehicleId: body.vehicleId,
       material: body.material,
       quantity: Number(body.quantity),
+      createdById: actor.userId,
     },
   });
 

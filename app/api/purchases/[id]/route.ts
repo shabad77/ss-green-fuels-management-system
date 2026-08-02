@@ -37,10 +37,11 @@ async function checkWriteAccess(id: number) {
     const ageMs = Date.now() - purchase.createdAt.getTime();
 
     if (ageMs > OPERATOR_EDIT_WINDOW_MS) {
+      const windowMinutes = OPERATOR_EDIT_WINDOW_MS / 60000;
       return {
         ok: false as const,
         response: NextResponse.json(
-          { error: "This purchase can no longer be edited — the 15-minute edit window has passed. Contact an Admin for changes." },
+          { error: `This purchase can no longer be edited — the ${windowMinutes}-minute edit window has passed. Contact an Admin for changes.` },
           { status: 403 }
         ),
       };

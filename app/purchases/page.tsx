@@ -27,6 +27,7 @@ type Purchase = {
   material: string;
   quantity: number;
   createdAt: string;
+  createdByName: string | null;
 };
 
 export default function PurchasesPage() {
@@ -502,6 +503,9 @@ return (
     <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Material</th>
     <th className="p-3 text-right text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Qty (Kg)</th>
     <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Time</th>
+    {currentUser?.role === "ADMIN" && (
+      <th className="p-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Added By</th>
+    )}
     <th className="p-3 text-center text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">Action</th>
   </tr>
 </thead>
@@ -511,7 +515,7 @@ return (
         {filteredPurchases.length === 0 ? (
 
           <tr>
-            <td colSpan={7} className="text-center p-10 text-slate-400 text-[13.5px]">
+            <td colSpan={currentUser?.role === "ADMIN" ? 8 : 7} className="text-center p-10 text-slate-400 text-[13.5px]">
               No purchases recorded yet
             </td>
             
@@ -546,6 +550,12 @@ return (
               <td className="p-3 text-slate-500">
   {new Date(purchase.createdAt).toLocaleString()}
 </td>
+
+{currentUser?.role === "ADMIN" && (
+  <td className="p-3 text-slate-500">
+    {purchase.createdByName || "—"}
+  </td>
+)}
 
 <td className="p-3">
   {(() => {
